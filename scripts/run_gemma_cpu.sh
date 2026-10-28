@@ -19,5 +19,5 @@ exec llama serve \
   --host 127.0.0.1 \
   --port 8080 \
   -ngl "$layers" \
-  -c 4096 \
+  -c "${CONTEXT_SIZE:-8192}" \
   --no-webui

@@ -34,10 +34,11 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
 Set `MODEL_ID` and `LLM_MODEL` to the same complete Hugging Face ID in `.env`.
-The repository default is `google/gemma-4-E2B-it-qat-q4_0-gguf:Q4_0`. Accept
-its Gemma license on Hugging Face before using a read token to download it.
-The Kaggle launcher explicitly selects Gemma 4 12B Q4 and offloads it to GPU;
-it does not use `.env` for model selection.
+The repository default is `google/gemma-4-12B-it-qat-q4_0-gguf:Q4_0` with GPU
+offload enabled and an 8192-token context. The measured single-GPU peak on a
+Kaggle T4 was 7851 MiB. The separate `.env.cpu.example` keeps Gemma 4 E2B as a
+lighter CPU option. The Kaggle launcher selects 12B directly and does not use
+`.env` for model selection.
 
 For a manual development launch, first start an OpenAI-compatible model server on port 8080, then:
 
@@ -48,8 +49,8 @@ pip install -r requirements-dev.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-The API defaults to temperature `1.0`, top-p `0.95`, top-k `64`, and maximum
-output `512` tokens. Node may send lower values for short government answers.
+The API defaults to temperature `1.0`, top-p `0.95`, top-k `64`, and a maximum
+output of `4096` tokens. The model can stop naturally before that limit.
 
 Direct E2B llama.cpp CPU command, if you prefer not to use the script:
 
