@@ -8,6 +8,11 @@ Stateless FastAPI adapter for a local OpenAI-compatible model server. It stores 
 
 Node owns application state: users, sessions, memory, prompts, and message history. FastAPI owns only a bounded global generation queue, so multiple projects cannot make the one Gemma process generate simultaneously. llama.cpp only generates tokens.
 
+The recommended Node system prompt is tracked at
+[`prompts/nepali_government_assistant.txt`](prompts/nepali_government_assistant.txt).
+FastAPI deliberately does not inject it, because each client sends its complete
+message list.
+
 ## Run
 
 Install llama.cpp once, then run Gemma locally on CPU:
