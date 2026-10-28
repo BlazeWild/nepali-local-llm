@@ -1,94 +1,185 @@
 # Nepali Local LLM API
 
-Stateless FastAPI adapter for a local OpenAI-compatible model server. It stores no users, sessions, prompts, or chat history. Node sends the complete message list for each generation.
+Authenticated, stateless FastAPI adapter for Gemma 4 running through llama.cpp.
 
-## Architecture
+Default local configuration:
 
-`Node/MongoDB -> stateless FastAPI global queue -> private llama.cpp Gemma server`
+- Model: `google/gemma-4-12B-it-qat-q4_0-gguf:Q4_0`
+- Device: NVIDIA GPU (`USE_CPU=false`, `GPU_LAYERS=99`)
+- Context: 8192 tokens
+- Maximum requested output: 4096 tokens
+- llama.cpp: `http://127.0.0.1:8080`
+- FastAPI: `http://127.0.0.1:8000`
 
-Node owns application state: users, sessions, memory, prompts, and message history. FastAPI owns only a bounded global generation queue, so multiple projects cannot make the one Gemma process generate simultaneously. llama.cpp only generates tokens.
+The measured peak for this model with an 8192-token context was 7851 MiB on
+one Kaggle T4. It should fit on a 12 GiB GPU, although free memory depends on
+other GPU processes and the installed llama.cpp version.
 
-The recommended Node system prompt is tracked at
-[`prompts/nepali_government_assistant.txt`](prompts/nepali_government_assistant.txt).
-FastAPI deliberately does not inject it, because each client sends its complete
-message list.
+## Local GPU setup (recommended)
 
-## Run
+### 1. Install prerequisites
 
-Install llama.cpp once, then run Gemma locally on CPU:
+You need Linux, Python 3.10+, Git, `curl`, `openssl`, and a working NVIDIA
+driver. These commands must succeed:
+
+```bash
+nvidia-smi
+python3 --version
+```
+
+Install llama.cpp once:
 
 ```bash
 curl -LsSf https://llama.app/install.sh | sh
 source ~/.bashrc
-cp .env.cpu.example .env
-# Set LLM_API_KEY in .env to the same secret used by the Node backend.
-./scripts/run_gemma_cpu.sh
+llama --version
 ```
 
-The CPU example uses `google/gemma-4-E2B-it-qat-q4_0-gguf:Q4_0`. Gemma is
-the model; llama.cpp is the runtime that loads its GGUF file. `USE_CPU=true`
-selects `-ngl 0`. The model download happens automatically on first launch.
-
-In a second terminal, start the adapter:
+### 2. Clone and configure
 
 ```bash
-python -m venv .venv
+git clone https://github.com/BlazeWild/nepali-local-llm.git
+cd nepali-local-llm
+cp .env.example .env
+openssl rand -hex 32
+```
+
+Copy the generated value into `.env`:
+
+```env
+LLM_API_KEY=PASTE_THE_GENERATED_KEY_HERE
+```
+
+The checked-in `.env.example` already enables Gemma 4 12B on the GPU:
+
+```env
+MODEL_ID=google/gemma-4-12B-it-qat-q4_0-gguf:Q4_0
+LLM_MODEL=google/gemma-4-12B-it-qat-q4_0-gguf:Q4_0
+USE_CPU=false
+GPU_LAYERS=99
+CONTEXT_SIZE=8192
+DEFAULT_MAX_TOKENS=4096
+```
+
+`.env` is ignored by Git. Never commit its API key.
+
+### 3. Start Gemma 4 12B on the GPU
+
+```bash
+chmod +x scripts/run_gemma.sh
+./scripts/run_gemma.sh
+```
+
+The first run downloads the GGUF model. Keep this terminal running. The script
+prints the selected GPU and starts llama.cpp with `-ngl 99`.
+
+### 4. Start FastAPI
+
+Open another terminal in the repository:
+
+```bash
+python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-Set `MODEL_ID` and `LLM_MODEL` to the same complete Hugging Face ID in `.env`.
-The repository default is `google/gemma-4-12B-it-qat-q4_0-gguf:Q4_0` with GPU
-offload enabled and an 8192-token context. The measured single-GPU peak on a
-Kaggle T4 was 7851 MiB. The separate `.env.cpu.example` keeps Gemma 4 E2B as a
-lighter CPU option. The Kaggle launcher selects 12B directly and does not use
-`.env` for model selection.
-
-For a manual development launch, first start an OpenAI-compatible model server on port 8080, then:
+### 5. Test the API
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements-dev.txt
-uvicorn app.main:app --reload --port 8000
+curl http://127.0.0.1:8000/health
 ```
 
-The API defaults to temperature `1.0`, top-p `0.95`, top-k `64`, and a maximum
-output of `4096` tokens. The model can stop naturally before that limit.
-
-Direct E2B llama.cpp CPU command, if you prefer not to use the script:
+Use the same key stored in `.env`:
 
 ```bash
-llama-server -hf google/gemma-4-E2B-it-qat-q4_0-gguf:Q4_0 --host 127.0.0.1 --port 8080 -ngl 0 -c 4096 --no-webui
+export LLM_API_KEY="PASTE_THE_SAME_KEY_HERE"
+
+curl -X POST "http://127.0.0.1:8000/v1/generate" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $LLM_API_KEY" \
+  -d '{
+    "messages": [
+      {
+        "role": "system",
+        "content": "तपाईं नेपालीमा स्पष्ट र तथ्यपरक उत्तर दिने सहायक हुनुहुन्छ।"
+      },
+      {
+        "role": "user",
+        "content": "नेपालको राजधानीको छोटो परिचय दिनुहोस्।"
+      }
+    ],
+    "temperature": 0.3,
+    "top_p": 0.95,
+    "top_k": 64,
+    "max_tokens": 1024
+  }'
 ```
 
-For a Kaggle GPU deployment with a fixed authenticated ngrok endpoint, follow
-[`KAGGLE.md`](KAGGLE.md).
+## CPU fallback
+
+Gemma 4 12B is intended for the GPU setup above. For a lighter CPU test, use
+Gemma 4 E2B:
+
+```bash
+cp .env.cpu.example .env
+# Set LLM_API_KEY in .env.
+./scripts/run_gemma.sh
+```
+
+CPU generation is substantially slower. `.env.cpu.example` selects E2B,
+disables GPU offload, and reduces context/output limits.
+
+## Architecture
+
+```text
+Node/backend -> authenticated FastAPI queue -> llama.cpp -> Gemma 4 12B
+```
+
+The adapter is stateless. It stores no users, prompts, conversations, or chat
+history. Each request includes the complete `messages` list. The calling
+backend owns authentication, persistence, prompts, and conversation history.
+FastAPI supplies a bounded global generation queue.
+
+System-prompt examples:
+
+- `prompts/nepali_government_assistant.txt`
+- `prompts/nepali_legal_drafting_assistant.txt`
+
+FastAPI does not inject a prompt automatically. The caller sends the relevant
+system message with every request.
 
 ## API
 
-- `POST /v1/generate` — accept a complete prompt and generation controls, return generated text and global queue position
-- `GET /health` — adapter status plus current and peak GPU VRAM measured by
-  `nvidia-smi` every 0.5 seconds
+- `GET /health` — model status and current/peak NVIDIA GPU memory
+- `POST /v1/generate` — authenticated generation endpoint
 
-`POST /v1/generate` requires `Authorization: Bearer <LLM_API_KEY>`.
+Generation requires:
 
-`POST /v1/generate` request example:
-
-```json
-{
-  "messages": [
-    {"role": "system", "content": "You are a helpful Nepali assistant."},
-    {"role": "user", "content": "नमस्ते"}
-  ],
-  "temperature": 0.3,
-  "top_p": 0.95,
-  "top_k": 64,
-  "max_tokens": 512
-}
+```http
+Authorization: Bearer <LLM_API_KEY>
 ```
 
-The adapter never writes any of these messages to a database.
+The maximum accepted `max_tokens` is 4096. The system prompt, chat history,
+current input, and generated output must fit within the 8192-token context.
 
-Run `pytest -q` for the stateless adapter test.
+## Tests
+
+```bash
+source .venv/bin/activate
+pip install -r requirements-dev.txt
+pytest -q
+```
+
+The optional legal evaluator reads `LLM_API_URL` and `LLM_API_KEY` from `.env`,
+tests PDF retrieval/summary, letter generation, and case-data summary, and
+writes its generated PDF under the ignored `outputs/` directory:
+
+```bash
+python3 examples/legal_workflow_eval.py
+```
+
+## Kaggle
+
+Kaggle deployment is separate. See [KAGGLE.md](KAGGLE.md). The local GPU setup
+above does not require Kaggle or ngrok.
