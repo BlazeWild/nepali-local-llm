@@ -28,7 +28,9 @@ Then keep this cell running:
 Gemma 4 12B QAT Q4 is selected directly by `scripts/kaggle_start.py`; no model
 setting or `.env` file is required in the notebook. The launcher offloads all
 model layers to the Kaggle GPU with `-ngl 99` and allocates an 8192-token
-context for requests with up to 4096 output tokens.
+context for requests with up to 4096 output tokens. `CUDA_VISIBLE_DEVICES=0`
+forces single-GPU inference even when Kaggle assigns two T4 GPUs, so measured
+VRAM represents the intended one-GPU deployment.
 
 Point the local Node backend at the printed address:
 

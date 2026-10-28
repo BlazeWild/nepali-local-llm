@@ -61,6 +61,8 @@ def main() -> None:
     env = os.environ.copy()
     env.update(
         {
+            # Match the target deployment: one GPU only, even on Kaggle T4 x2.
+            "CUDA_VISIBLE_DEVICES": "0",
             "ADAPTER_API_KEY": kaggle_secret("MODEL_API_KEY"),
             "LLM_BASE_URL": "http://127.0.0.1:8080/v1",
             "LLM_API_KEY": "kaggle-internal-llama-key",
@@ -107,7 +109,7 @@ def main() -> None:
             )
         )
         print(
-            f"Loading Gemma 4 12B on GPU with {CONTEXT_SIZE}-token context; "
+            f"Loading Gemma 4 12B on GPU 0 only with {CONTEXT_SIZE}-token context; "
             "follow /kaggle/working/llama-server.log",
             flush=True,
         )
