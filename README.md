@@ -36,7 +36,8 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000
 Set `MODEL_ID` and `LLM_MODEL` to the same complete Hugging Face ID in `.env`.
 The repository default is `google/gemma-4-E2B-it-qat-q4_0-gguf:Q4_0`. Accept
 its Gemma license on Hugging Face before using a read token to download it.
-The Kaggle launcher intentionally overrides this with Gemma 4 12B Q4.
+The Kaggle launcher explicitly selects Gemma 4 E2B Q4 and offloads it to GPU;
+it does not use `.env` for model selection.
 
 For a manual development launch, first start an OpenAI-compatible model server on port 8080, then:
 
