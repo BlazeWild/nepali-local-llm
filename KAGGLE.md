@@ -9,7 +9,7 @@ Add these Kaggle secrets and enable notebook access for each one:
 - `HF_TOKEN` (optional): Hugging Face read token, useful for higher download limits
 - `NGROK_AUTHTOKEN`: ngrok account token
 - `NGROK_DOMAIN`: assigned static domain without a path, for example `name.ngrok-free.app`
-- `MODEL_API_KEY`: a random API secret used by the Node backend
+- `LLM_API_KEY`: a random bearer token used by the Node backend
 
 Run these cells:
 
@@ -36,7 +36,7 @@ Point the local Node backend at the printed address:
 
 ```dotenv
 LLM_API_URL=https://name.ngrok-free.app
-LLM_API_KEY=the-same-value-as-MODEL_API_KEY
+LLM_API_KEY=the-same-value-as-the-Kaggle-LLM_API_KEY
 ```
 
 The endpoint is `POST /v1/generate`. The tunnel and inference server stop when

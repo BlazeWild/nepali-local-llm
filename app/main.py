@@ -21,7 +21,7 @@ def require_api_key(
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
 ):
     if credentials is None or not secrets.compare_digest(
-        credentials.credentials, settings.adapter_api_key
+        credentials.credentials, settings.llm_api_key
     ):
         raise HTTPException(401, "Invalid or missing API key")
 

@@ -63,9 +63,9 @@ def main() -> None:
         {
             # Match the target deployment: one GPU only, even on Kaggle T4 x2.
             "CUDA_VISIBLE_DEVICES": "0",
-            "ADAPTER_API_KEY": kaggle_secret("MODEL_API_KEY"),
-            "LLM_BASE_URL": "http://127.0.0.1:8080/v1",
-            "LLM_API_KEY": "kaggle-internal-llama-key",
+            "LLM_API_KEY": kaggle_secret("LLM_API_KEY"),
+            "LLAMA_BASE_URL": "http://127.0.0.1:8080/v1",
+            "LLAMA_API_KEY": "kaggle-internal-llama-key",
             "LLM_MODEL": MODEL_ID,
             "USE_CPU": "false",
             "REQUEST_TIMEOUT_SECONDS": "300",
@@ -94,7 +94,7 @@ def main() -> None:
                     "--port",
                     "8080",
                     "--api-key",
-                    env["LLM_API_KEY"],
+                    env["LLAMA_API_KEY"],
                     "-ngl",
                     "99",
                     "-c",
@@ -115,7 +115,7 @@ def main() -> None:
         )
         wait_for(
             "http://127.0.0.1:8080/v1/models",
-            {"Authorization": f"Bearer {env['LLM_API_KEY']}"},
+            {"Authorization": f"Bearer {env['LLAMA_API_KEY']}"},
         )
         subprocess.run(
             [

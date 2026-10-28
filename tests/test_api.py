@@ -2,7 +2,7 @@ import os
 
 from fastapi.testclient import TestClient
 
-os.environ.setdefault("ADAPTER_API_KEY", "test-adapter-key")
+os.environ.setdefault("LLM_API_KEY", "test-api-key")
 
 from app import main
 
@@ -15,7 +15,7 @@ def test_stateless_generation(monkeypatch):
     with TestClient(main.app) as client:
         response = client.post(
             "/v1/generate",
-            headers={"Authorization": f"Bearer {main.settings.adapter_api_key}"},
+            headers={"Authorization": f"Bearer {main.settings.llm_api_key}"},
             json={"messages": [{"role": "user", "content": "नमस्ते"}]},
         )
         assert response.status_code == 200

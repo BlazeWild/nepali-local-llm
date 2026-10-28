@@ -15,11 +15,11 @@ async def generate(
         "max_tokens": max_tokens,
         "stream": False,
     }
-    headers = {"Authorization": f"Bearer {settings.llm_api_key}"}
+    headers = {"Authorization": f"Bearer {settings.llama_api_key}"}
     timeout = httpx.Timeout(settings.request_timeout_seconds)
     async with httpx.AsyncClient(timeout=timeout) as client:
         response = await client.post(
-            f"{settings.llm_base_url.rstrip('/')}/chat/completions",
+            f"{settings.llama_base_url.rstrip('/')}/chat/completions",
             json=payload,
             headers=headers,
         )

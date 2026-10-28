@@ -21,7 +21,7 @@ Install llama.cpp once, then run Gemma locally on CPU:
 curl -LsSf https://llama.app/install.sh | sh
 source ~/.bashrc
 cp .env.cpu.example .env
-# Set ADAPTER_API_KEY in .env to the same secret used by the Node backend.
+# Set LLM_API_KEY in .env to the same secret used by the Node backend.
 ./scripts/run_gemma_cpu.sh
 ```
 
@@ -72,7 +72,7 @@ For a Kaggle GPU deployment with a fixed authenticated ngrok endpoint, follow
 - `GET /health` — adapter status plus current and peak GPU VRAM measured by
   `nvidia-smi` every 0.5 seconds
 
-`POST /v1/generate` requires `Authorization: Bearer <ADAPTER_API_KEY>`.
+`POST /v1/generate` requires `Authorization: Bearer <LLM_API_KEY>`.
 
 `POST /v1/generate` request example:
 
