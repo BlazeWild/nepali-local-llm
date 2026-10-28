@@ -1,7 +1,7 @@
 # Kaggle Gemma API
 
 Create a GPU notebook with Internet enabled. Accept the Gemma license for
-`google/gemma-4-12B-it-qat-q4_0-gguf` using the same Hugging Face account as the
+`google/gemma-4-E2B-it-qat-q4_0-gguf` using the same Hugging Face account as the
 token.
 
 Add these Kaggle secrets and enable notebook access for each one:
@@ -25,7 +25,7 @@ Then keep this cell running:
 !python scripts/kaggle_start.py
 ```
 
-Gemma 4 12B QAT Q4 is selected directly by `scripts/kaggle_start.py`; no model
+Gemma 4 E2B QAT Q4 is selected directly by `scripts/kaggle_start.py`; no model
 setting or `.env` file is required in the notebook. The launcher offloads all
 model layers to the Kaggle GPU with `-ngl 99`.
 
