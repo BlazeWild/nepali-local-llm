@@ -1,7 +1,7 @@
 # Kaggle Gemma API
 
 Create a GPU notebook with Internet enabled. Accept the Gemma license for
-`google/gemma-3-12b-it-qat-q4_0-gguf` using the same Hugging Face account as the
+`google/gemma-4-12B-it-qat-q4_0-gguf` using the same Hugging Face account as the
 token.
 
 Add these Kaggle secrets and enable notebook access for each one:
@@ -25,7 +25,7 @@ Then keep this cell running:
 !python scripts/kaggle_start.py
 ```
 
-Gemma 3 12B QAT Q4 is the default model; no model setting is required in the
+Gemma 4 12B QAT Q4 is the default model; no model setting is required in the
 notebook.
 
 Point the local Node backend at the printed address:

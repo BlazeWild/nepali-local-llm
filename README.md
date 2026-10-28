@@ -21,7 +21,7 @@ source ~/.bashrc
 Gemma is the model; llama.cpp is the runtime that loads its GGUF file. `USE_CPU=true` selects `-ngl 0`; set `USE_CPU=false` to use `GPU_LAYERS` (default `99`). `--no-webui` disables llama.cpp's optional page. The model download happens automatically on first launch.
 
 Set `MODEL_ID` and `LLM_MODEL` to the same complete Hugging Face ID in `.env`.
-The configured model is `google/gemma-3-12b-it-qat-q4_0-gguf:Q4_0`. Accept its
+The configured model is `google/gemma-4-12B-it-qat-q4_0-gguf:Q4_0`. Accept its
 Gemma license on Hugging Face before using a read token to download it.
 
 For a manual development launch, first start an OpenAI-compatible model server on port 8080, then:
@@ -39,7 +39,7 @@ output `512` tokens. Node may send lower values for short government answers.
 Direct llama.cpp CPU command, if you prefer not to use the script:
 
 ```bash
-llama-server -hf google/gemma-3-12b-it-qat-q4_0-gguf:Q4_0 --host 127.0.0.1 --port 8080 -ngl 0 -c 4096 --no-webui
+llama-server -hf google/gemma-4-12B-it-qat-q4_0-gguf:Q4_0 --host 127.0.0.1 --port 8080 -ngl 0 -c 4096 --no-webui
 ```
 
 For a Kaggle GPU deployment with a fixed authenticated ngrok endpoint, follow

@@ -6,7 +6,7 @@ class Settings(BaseSettings):
 
     llm_base_url: str = "http://127.0.0.1:8080/v1"
     llm_api_key: str = "local"
-    llm_model: str = "google/gemma-3-12b-it-qat-q4_0-gguf:Q4_0"
+    llm_model: str = "google/gemma-4-12B-it-qat-q4_0-gguf:Q4_0"
     adapter_api_key: str
     use_cpu: bool = True
     request_timeout_seconds: float = 180
