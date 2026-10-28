@@ -29,6 +29,18 @@ def kaggle_secret(name: str) -> str:
         raise RuntimeError(f"Missing Kaggle secret: {name}") from exc
 
 
+def optional_kaggle_secret(name: str) -> str | None:
+    value = os.getenv(name)
+    if value:
+        return value
+    try:
+        from kaggle_secrets import UserSecretsClient
+
+        return UserSecretsClient().get_secret(name)
+    except Exception:
+        return None
+
+
 def wait_for(url: str, headers: dict[str, str] | None = None, timeout: int = 900) -> None:
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
@@ -48,7 +60,6 @@ def main() -> None:
     env = os.environ.copy()
     env.update(
         {
-            "HF_TOKEN": kaggle_secret("HF_TOKEN"),
             "ADAPTER_API_KEY": kaggle_secret("MODEL_API_KEY"),
             "LLM_BASE_URL": "http://127.0.0.1:8080/v1",
             "LLM_API_KEY": "kaggle-internal-llama-key",
@@ -58,6 +69,9 @@ def main() -> None:
             "MAX_QUEUE_SIZE": "10",
         }
     )
+    hf_token = optional_kaggle_secret("HF_TOKEN")
+    if hf_token:
+        env["HF_TOKEN"] = hf_token
     ngrok_token = kaggle_secret("NGROK_AUTHTOKEN")
     ngrok_domain = kaggle_secret("NGROK_DOMAIN").removeprefix("https://").rstrip("/")
 

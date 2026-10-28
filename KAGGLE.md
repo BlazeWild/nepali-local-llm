@@ -6,7 +6,7 @@ token.
 
 Add these Kaggle secrets and enable notebook access for each one:
 
-- `HF_TOKEN`: Hugging Face read token
+- `HF_TOKEN` (optional): Hugging Face read token, useful for higher download limits
 - `NGROK_AUTHTOKEN`: ngrok account token
 - `NGROK_DOMAIN`: assigned static domain without a path, for example `name.ngrok-free.app`
 - `MODEL_API_KEY`: a random API secret used by the Node backend
