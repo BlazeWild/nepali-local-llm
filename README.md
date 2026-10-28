@@ -63,7 +63,8 @@ For a Kaggle GPU deployment with a fixed authenticated ngrok endpoint, follow
 ## API
 
 - `POST /v1/generate` — accept a complete prompt and generation controls, return generated text and global queue position
-- `GET /health` — adapter configuration status
+- `GET /health` — adapter status plus current and peak GPU VRAM measured by
+  `nvidia-smi` every 0.5 seconds
 
 `POST /v1/generate` requires `Authorization: Bearer <ADAPTER_API_KEY>`.
 

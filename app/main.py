@@ -7,11 +7,13 @@ from fastapi import Depends, FastAPI, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from .config import settings
+from .gpu import GpuMonitor
 from .llm import generate
 from .queue import InferenceQueue
 from .schemas import GenerateRequest, GenerateResponse
 
 inference_queue = InferenceQueue(settings.max_queue_size)
+gpu_monitor = GpuMonitor()
 bearer_scheme = HTTPBearer(auto_error=False)
 
 
@@ -27,7 +29,10 @@ def require_api_key(
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     inference_queue.start()
+    if not settings.use_cpu:
+        gpu_monitor.start()
     yield
+    await gpu_monitor.close()
     await inference_queue.close()
 
 
@@ -37,7 +42,13 @@ app = FastAPI(title="Stateless Nepali LLM Adapter", version="0.3.0", lifespan=li
 @app.get("/health")
 async def health():
     device = "cpu" if settings.use_cpu else "gpu"
-    return {"status": "ok", "model": settings.llm_model, "device": device, "queued": inference_queue.jobs.qsize()}
+    return {
+        "status": "ok",
+        "model": settings.llm_model,
+        "device": device,
+        "queued": inference_queue.jobs.qsize(),
+        "gpu": gpu_monitor.snapshot() if not settings.use_cpu else None,
+    }
 
 
 @app.post(
