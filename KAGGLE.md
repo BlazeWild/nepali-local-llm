@@ -25,6 +25,9 @@ Then keep this cell running:
 !python scripts/kaggle_start.py
 ```
 
+Gemma 3 12B QAT Q4 is the default model; no model setting is required in the
+notebook.
+
 Point the local Node backend at the printed address:
 
 ```dotenv
