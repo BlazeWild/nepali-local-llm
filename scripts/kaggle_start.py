@@ -123,7 +123,11 @@ def main() -> None:
         wait_for("http://127.0.0.1:8000/health")
 
         conf.get_default().auth_token = ngrok_token
-        tunnel = ngrok.connect(addr=8000, proto="http", domain=ngrok_domain)
+        tunnel = ngrok.connect(
+            addr=8000,
+            proto="http",
+            url=f"https://{ngrok_domain}",
+        )
         print(f"Authenticated model API: {tunnel.public_url}/v1/generate", flush=True)
         print("Keep this cell running. Interrupt it to stop all services.", flush=True)
 
