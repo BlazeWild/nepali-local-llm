@@ -27,6 +27,7 @@ class GpuMonitor:
 
     def snapshot(self) -> dict:
         return {
+            "scope": "all_processes_on_gpu",
             "current_used_mib": self.current_used_mib,
             "peak_used_mib": self.peak_used_mib,
             "total_mib": self.total_mib,

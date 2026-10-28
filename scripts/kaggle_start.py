@@ -12,7 +12,8 @@ from pathlib import Path
 import httpx
 from pyngrok import conf, ngrok
 
-MODEL_ID = "google/gemma-4-E2B-it-qat-q4_0-gguf:Q4_0"
+MODEL_ID = "google/gemma-4-12B-it-qat-q4_0-gguf:Q4_0"
+CONTEXT_SIZE = "8192"
 WORK_DIR = Path(os.getenv("KAGGLE_WORKING_DIR", "/kaggle/working"))
 LLAMA_SERVER = WORK_DIR / "llama.cpp/build/bin/llama-server"
 
@@ -95,7 +96,7 @@ def main() -> None:
                     "-ngl",
                     "99",
                     "-c",
-                    "4096",
+                    CONTEXT_SIZE,
                     "-np",
                     "1",
                     "--no-webui",
@@ -105,7 +106,11 @@ def main() -> None:
                 stderr=subprocess.STDOUT,
             )
         )
-        print("Loading Gemma 4 E2B on GPU; follow /kaggle/working/llama-server.log", flush=True)
+        print(
+            f"Loading Gemma 4 12B on GPU with {CONTEXT_SIZE}-token context; "
+            "follow /kaggle/working/llama-server.log",
+            flush=True,
+        )
         wait_for(
             "http://127.0.0.1:8080/v1/models",
             {"Authorization": f"Bearer {env['LLM_API_KEY']}"},
