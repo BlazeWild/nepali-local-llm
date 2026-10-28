@@ -8,6 +8,9 @@ from dotenv import load_dotenv
 repo_root = Path(__file__).resolve().parents[1]
 load_dotenv(repo_root / ".env")
 load_dotenv(repo_root.parent / "nepali-chat-demo/backend/.env")
+system_prompt = (repo_root / "prompts/nepali_government_assistant.txt").read_text(
+    encoding="utf-8"
+).strip()
 
 API_URL = os.getenv(
     "LLM_API_URL",
@@ -23,6 +26,7 @@ response = httpx.post(
     headers={"Authorization": f"Bearer {API_KEY}"},
     json={
         "messages": [
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": "नेपालको राजधानी के हो?"},
         ],
         "max_tokens": 1024,
