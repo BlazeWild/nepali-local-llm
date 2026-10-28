@@ -15,10 +15,23 @@ Install llama.cpp once, then run Gemma locally on CPU:
 ```bash
 curl -LsSf https://llama.app/install.sh | sh
 source ~/.bashrc
+cp .env.cpu.example .env
+# Set ADAPTER_API_KEY in .env to the same secret used by the Node backend.
 ./scripts/run_gemma_cpu.sh
 ```
 
-Gemma is the model; llama.cpp is the runtime that loads its GGUF file. `USE_CPU=true` selects `-ngl 0`; set `USE_CPU=false` to use `GPU_LAYERS` (default `99`). `--no-webui` disables llama.cpp's optional page. The model download happens automatically on first launch.
+The CPU example uses `google/gemma-4-E2B-it-qat-q4_0-gguf:Q4_0`. Gemma is
+the model; llama.cpp is the runtime that loads its GGUF file. `USE_CPU=true`
+selects `-ngl 0`. The model download happens automatically on first launch.
+
+In a second terminal, start the adapter:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
 
 Set `MODEL_ID` and `LLM_MODEL` to the same complete Hugging Face ID in `.env`.
 The configured model is `google/gemma-4-12B-it-qat-q4_0-gguf:Q4_0`. Accept its
@@ -36,10 +49,10 @@ uvicorn app.main:app --reload --port 8000
 The API defaults to temperature `1.0`, top-p `0.95`, top-k `64`, and maximum
 output `512` tokens. Node may send lower values for short government answers.
 
-Direct llama.cpp CPU command, if you prefer not to use the script:
+Direct E2B llama.cpp CPU command, if you prefer not to use the script:
 
 ```bash
-llama-server -hf google/gemma-4-12B-it-qat-q4_0-gguf:Q4_0 --host 127.0.0.1 --port 8080 -ngl 0 -c 4096 --no-webui
+llama-server -hf google/gemma-4-E2B-it-qat-q4_0-gguf:Q4_0 --host 127.0.0.1 --port 8080 -ngl 0 -c 4096 --no-webui
 ```
 
 For a Kaggle GPU deployment with a fixed authenticated ngrok endpoint, follow
